@@ -1,0 +1,63 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Khayine</title>
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Create Khayine</h1>
+
+    <!-- Form for Single Khayine Creation -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Khayine Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter khayine name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="district" class="form-label">District</label>
+            <select id="district" name="district" class="form-select" required>
+                <option value="">Select a district</option>
+                {% for district in districts %}
+                <option value="{{ district.id }}">{{ district.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Create Khayine</button>
+            <a href="{% url 'khayine_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+    </form>
+
+    <hr class="my-5">
+
+    <!-- Form for Bulk Khayine Creation via Excel -->
+    <h2 class="text-center mb-4">Bulk Upload Khayine (Excel)</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="file" class="form-label">Upload Excel File</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Upload and Create Khayine</button>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

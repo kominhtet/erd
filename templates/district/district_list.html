@@ -1,0 +1,49 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>District List</title>
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">District List</h1>
+
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for district in districts %}
+            <tr>
+                <td>{{ district.id }}</td>
+                <td>{{ district.name }}</td>
+                <td>
+                    <a href="{% url 'district_update' district.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'district_delete' district.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'district_create' %}" class="btn btn-primary">Create New District</a>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

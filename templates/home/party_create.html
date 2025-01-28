@@ -1,0 +1,46 @@
+{% extends 'includes/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1 class="text-center mb-4">Create New Party</h1>
+
+                <!-- Form for Single Party Creation -->
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Party Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter party name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Party Logo (Optional)</label>
+                        <input type="file" class="form-control" id="logo" name="logo">
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Create Party</button>
+                        <a href="{% url 'party_list' %}" class="btn btn-secondary ms-2">Back to Party List</a>
+                    </div>
+                </form>
+
+                <hr class="my-5">
+
+                <!-- Form for Bulk Party Creation using Excel -->
+                <h2 class="text-center mb-4">Bulk Upload Parties (Excel)</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="excel_file" class="form-label">Upload Excel File</label>
+                        <input type="file" class="form-control" id="excel_file" name="excel_file" accept=".xlsx, .xls" required>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success">Upload and Create Parties</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

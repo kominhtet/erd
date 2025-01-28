@@ -1,0 +1,619 @@
+{% extends 'includes/base.html' %}
+{% block navbar %}
+  {{ block.super }} {# Ensures the navbar from the parent template is displayed #}
+{% endblock %}
+{% load static %}
+{% block content %}
+<style>
+    body {
+        font-family: 'Montserrat', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    
+
+    .title {
+        font-size: 2rem;
+        margin: 10px 0;
+    }
+
+    .map {
+        width: 100%; /* Ensures the map container takes the full width of the parent */
+        height: auto; /* Maintains aspect ratio */
+        display: flex; /* Centers SVG content */
+        justify-content: center; /* Horizontal centering */
+        align-items: center; /* Vertical centering */
+    }
+
+    .map svg {
+        height: 100%;
+        position: relative;
+        filter: drop-shadow(3px 3px 5px #3a3a3a);
+        animation: mapAnimation 1s ease-out;
+    }
+
+    .map path.district {
+        fill: var(--primary); /* Default color */
+        stroke: #232323; /* Optional stroke */
+        transition: fill 0.5s ease, transform 0.3s ease;
+    }
+
+    
+
+    .map path.district.active {
+        stroke-width: 4px;
+        transform: scale(1.05);
+    }
+
+    #district-details img {
+        width: 800px; /* Match chart width */
+        height: 500px; /* Match chart height */
+        object-fit: contain; /* Maintain aspect ratio within size */
+    }
+
+    /* Animations */
+    @keyframes mapAnimation {
+        0% {
+            transform: translateY(50px);
+            stroke-opacity: 0.2;
+            opacity: 0.1;
+        }
+        50% {
+            stroke-opacity: 0.5;
+            opacity: 0.5;
+        }
+        100% {
+            stroke-opacity: 1;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+</style>   
+<h2>ပြည်နယ်အလိုက်မှ မဲဆန္ဒနယ်အလိုက် ပါတီရလာဒ်များ</h2>
+<div class="row mb-4 d-flex align-items-center">
+    <div class="col-md-3">
+        <select id="district" class="form-control">
+            <option value="">ပြည်နယ်/တိုင်း</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select id="constituency" class="form-control">
+            <option value="">မဲဆန္ဒနယ်</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select id="hlutdaw" class="form-control">
+            <option value="">လွှတ်တော်</option>
+            <option value="ပြည်သူ့လွှတ်တော်">ပြည်သူ့လွှတ်တော်</option>
+            <option value="အမျိုးသားလွှတ်တော်">အမျိုးသားလွှတ်တော်</option>
+            <option value="တိုင်းဒေသကြီးလွှတ်တော်">တိုင်းဒေသကြီးလွှတ်တော်</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        <button onclick="fetchValidVotes()" class="btn btn-primary btn-block">Show Results</button>
+    </div>
+    <div class="col-md-1">
+        <a href="{% url 'index' %}" class="btn btn-secondary btn-block"><i class="bi bi-arrow-clockwise"></i>Refresh</a>
+    </div>
+</div>
+<div id="results" class="mt-4"></div>
+
+<!-- <div class="caption">
+    <h1 class="title">Myanmar State</h1>
+    <p class="location">Current Place: <span class="currentPlace">?</span></p>
+</div> -->
+<div class="row mt-4 align-items-center">
+    
+    <div class="col-md-12 col-sm-6  ">
+        <div class="x_panel">
+            <div class="x_title">
+            <!-- <h2>Line graph</h2> -->
+            
+            <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+            <canvas id="validVotesChart" width="300" height="100"></canvas>
+            </div>
+        </div>
+    </div>    
+                
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-9">    
+        <div id="constituency-details" width="400" height="200" class="mt-4"></div>
+    </div>
+    <div class="col-md-3">
+        <div id="constituency-details1"> </div>
+    </div>
+</div>  
+   
+        
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const api = "http://127.0.0.1:8000";
+        function resetFilters(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            window.location.href = "{% url 'index' %}"; // Redirect to the base index page
+        }
+        const districtApiUrl = `${api}/api/district/`; // District API URL
+        const constituencyApiUrl = `${api}/api/constituency/`;
+
+        // Object to map district IDs to names
+        const districtIdToNameMap = {};
+
+        // Populate districts dropdown
+        axios.get(districtApiUrl)
+            .then(response => {
+                const districts = response.data;
+                const districtSelect = document.getElementById("district");
+
+                districts.forEach(district => {
+                    const option = document.createElement("option");
+                    option.value = district.id; // Use ID as the value to fetch constituencies
+                    option.textContent = district.name;
+                    districtSelect.appendChild(option);
+
+                    // Map district ID to name for later use
+                    districtIdToNameMap[district.id] = district.name;
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching district data:", error);
+            });
+
+        // Add event listener to fetch constituencies for selected district
+            document.getElementById("district").addEventListener("change", function () {
+                const selectedDistrictId = this.value; // Get selected district ID
+                const constituencySelect = document.getElementById("constituency");
+
+                // Clear existing constituencies
+                constituencySelect.innerHTML = '<option value="">မဲဆန္ဒနယ်များ</option>';
+
+                if (selectedDistrictId) {
+                    // Fetch constituencies for the selected district
+                    axios.get(`${constituencyApiUrl}?district=${selectedDistrictId}`)
+                        .then(response => {
+                            const constituencies = response.data;
+
+                            constituencies.forEach(constituency => {
+                                const option = document.createElement("option");
+                                option.value = constituency.name; // Set constituency name as value
+                                option.textContent = constituency.name;
+                                constituencySelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error fetching constituency data:", error);
+                        });
+                }
+            });
+
+        async function fetchValidVotes() {
+            const selectedDistrictId = document.getElementById('district').value; // Fetch district ID
+            const selectedDistrictName = districtIdToNameMap[selectedDistrictId]; // Map ID to name
+            const selectedConstituency = document.getElementById('constituency').value; // Fetch name
+            const selectedHlutdaw = document.getElementById('hlutdaw').value;
+
+            console.log("Selected District (ID):", selectedDistrictId);
+            console.log("Selected District (Name):", selectedDistrictName);
+            console.log("Selected Constituency:", selectedConstituency);
+            console.log("Selected Hlutdaw:", selectedHlutdaw);
+
+            let apiUrl = `${api}/api/valid-vote/?`;
+            if (selectedDistrictName) apiUrl += `district=${encodeURIComponent(selectedDistrictName)}&`;
+            if (selectedConstituency) apiUrl += `constituency=${encodeURIComponent(selectedConstituency)}&`;
+            if (selectedHlutdaw) apiUrl += `hlutdaw=${encodeURIComponent(selectedHlutdaw)}`;
+            console.log("API URL:", apiUrl); 
+
+            try {
+                // Fetch valid votes based on selected filters
+                const votesResponse = await fetch(apiUrl);
+                const votesData = await votesResponse.json();
+
+                // Render vote chart with the fetched data
+                renderVoteChart(votesData);
+
+                // Fetch additional constituency details if a constituency is selected
+                if (selectedConstituency) {
+                    console.log("Selected Constituency:", selectedConstituency); // Log the selected constituency value
+                
+                    try {
+                        // const constituencyResponse = await fetch(
+                        //     `http://127.0.0.1:8000/api/constituency/?name=${encodeURIComponent(selectedConstituency)}&hlutdaw=${encodeURIComponent(selectedHlutdaw)}`
+                        // );
+                        const constituencyResponse = await fetch(
+                            `${api}/api/constituency/?name=${encodeURIComponent(selectedConstituency)}`
+                        );
+                        const constituencyData = await constituencyResponse.json();
+                
+                        // Log the API response
+                        console.log("API Response for Constituency Data:", constituencyData);
+                
+                        // Check if the data is valid
+                        if (!Array.isArray(constituencyData) || constituencyData.length === 0) {
+                            console.warn("No data returned for the selected constituency.");
+                        }
+                
+                        // Render constituency details
+                        renderConstituencyDetails(constituencyData);
+                        renderConstituencyDetails1(constituencyData);
+                    } catch (error) {
+                        console.error("Error fetching constituency data:", error);
+                    }
+                } else {
+                    console.warn("No constituency selected.");
+                }
+
+                // Fetch district details if a district is selected
+                if (selectedDistrictName) {
+                    const districtResponse = await fetch(
+                        `${api}/api/district/?name=${selectedDistrictName}`
+                    );
+                    const districtData = await districtResponse.json();
+
+                    // renderDistrictDetails(districtData);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const initialConstituency = 'မြစ်ကြီးနား'; // Set initial constituency
+
+            try {
+                const response = await fetch(
+                    `${api}/api/valid-vote/?constituency=${encodeURIComponent(initialConstituency)}`
+                );
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    console.warn(`No data available for constituency: ${initialConstituency}`);
+                } else {
+                    console.log(`Initial data for ${initialConstituency}:`, data);
+                    renderVoteChart(data); // Render the initial chart
+                }
+            } catch (error) {
+                console.error(`Error fetching initial data for ${initialConstituency}:`, error);
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Map of names to colors
+            const districtColors = {
+                "ရွှေဂူ": "red",
+                "ဖားကန့်": "green",
+                "တနိုင်း": "green",
+                "မိုးညှင်း": "green",
+                "ချီဖွေ": "green",
+                "မန်စီ": "green",
+                "ဝိုင်းမော်": "green",
+                "ခေါင်လန်ဖူး": "green",
+                "မိုးမောက်": "green",
+                "အင်ဂျန်းယန်": "yellow",
+                "ဆွမ်ပရာဘွမ်": "green",
+                "ဆော့လော်": "green",
+                "မချမ်းဘော": "red",
+                "ပူတာအို": "green",
+                "နောင်မွန်း": "red",
+                "မိုးကောင်း": "green",
+                "မြစ်ကြီးနား": "red",
+                "ဗန်းမော်": "green",
+            };
+
+            const svg = document.querySelector(".map svg");
+            // Select all district paths
+            const districts = document.querySelectorAll(".map path.district");
+
+            districts.forEach((district) => {
+                const districtName = district.getAttribute("name");
+                
+                // Set the district color
+                if (districtName && districtColors[districtName]) {
+                    district.style.fill = districtColors[districtName];
+                }
+
+                // Add label for the district
+                if (districtName) {
+                    // Get the bounding box of the path
+                    const bbox = district.getBBox();
+
+                    // Create a text element
+                    const textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    textElement.setAttribute("x", bbox.x + bbox.width / 2); // Center horizontally
+                    textElement.setAttribute("y", bbox.y + bbox.height / 2); // Center vertically
+                    textElement.setAttribute("text-anchor", "middle"); // Align text to the middle
+                    textElement.setAttribute("dominant-baseline", "middle"); // Align vertically
+                    textElement.style.fontSize = "30px"; // Font size
+                    textElement.style.fill = "black"; // Text color
+                    textElement.textContent = districtName;
+
+                    // Append the text element to the SVG
+                    svg.appendChild(textElement);
+                }
+            });
+        });
+        
+        let validVotesChart;
+        function renderVoteChart(data) {
+            const electionYears = [2010, 2015, 2020];
+            const partyData = {};
+
+            // Group data by year and party
+            electionYears.forEach(year => {
+                partyData[year] = {};
+                data.forEach(vote => {
+                    if (vote.election_year === year) {
+                        if (!partyData[year][vote.party]) {
+                            partyData[year][vote.party] = [];
+                        }
+                        partyData[year][vote.party].push(vote.percentage);
+                    }
+                });
+            });
+
+            const datasets = [];
+            const parties = [...new Set(data.map(vote => vote.party))];
+
+            // Create datasets for each party
+            parties.forEach(party => {
+                const percentageData = electionYears.map(year => {
+                    const percentages = partyData[year][party];
+                    return percentages ? percentages.reduce((a, b) => a + b) / percentages.length : 0;
+                });
+
+                datasets.push({
+                    label: party,
+                    data: percentageData,
+                    backgroundColor: getRandomColor(), // Random colors for each party
+                });
+            });
+
+            // Destroy existing chart instance if it exists
+            if (validVotesChart) {
+                validVotesChart.destroy();
+            }
+
+            // Initialize chart
+            const ctx = document.getElementById('validVotesChart').getContext('2d');
+            validVotesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: electionYears,
+                    datasets: datasets,
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                           
+                            position: 'right', // Legend position
+                            labels: {
+                                boxWidth: 15, // Legend color box size
+                                padding: 10, // Space between legend items
+                                font: {
+                                    size: 12, // Font size for legend labels
+                                },
+                            },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    return `${tooltipItem.dataset.label}: ${tooltipItem.raw.toFixed(2)}%`;
+                                },
+                            },
+                        },
+                    },
+                    layout: {
+                        padding: {
+                            right: 50, // Padding to accommodate legend
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Election Year', // Label for X-axis
+                            },
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Average Percentage', // Label for Y-axis
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        // Helper function to generate random colors for datasets
+        function getRandomColor() {
+                    const letters = '0123456789ABCDEF';
+                    let color = '#';
+                    for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const initialConstituency = 'မြစ်ကြီးနား'; // Set initial constituency
+
+            try {
+                // Fetch data for the initial constituency
+                const response = await fetch(
+                    `${api}/api/constituency/?name=${encodeURIComponent(initialConstituency)}`
+                );
+                const data = await response.json();
+
+                // Check if data is available
+                if (data.length === 0) {
+                    console.warn(`No data available for constituency: ${initialConstituency}`);
+                } else {
+                    console.log(`Initial data for ${initialConstituency}:`, data);
+
+                    // Render constituency details
+                    renderConstituencyDetails(data);
+                    renderConstituencyDetails1(data);
+                }
+            } catch (error) {
+                console.error(`Error fetching data for ${initialConstituency}:`, error);
+            }
+        });
+
+        function renderConstituencyDetails(data) {
+            const constituencyContainer = document.getElementById('constituency-details');
+            if (!constituencyContainer) {
+                console.error("Error: 'constituency-details' element not found.");
+                return;
+            }
+
+            constituencyContainer.innerHTML = ''; // Clear previous content
+
+            if (data.length === 0) {
+                constituencyContainer.innerHTML = '<p>No constituency data available.</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                constituencyContainer.innerHTML += `
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5>${item.name}</h5>
+                            <p>District: ${item.district}</p>
+                            <img src="${item.file}" alt="${item.name}" class="img-fluid">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderConstituencyDetails1(data) {
+            const constituencyContainer = document.getElementById('constituency-details1');
+            if (!constituencyContainer) {
+                console.error("Error: 'constituency-details1' element not found.");
+                return;
+            }
+
+            constituencyContainer.innerHTML = ''; // Clear previous content
+
+            if (data.length === 0) {
+                constituencyContainer.innerHTML = '<p>No detailed constituency data available.</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                constituencyContainer.innerHTML += `
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5>${item.name}</h5>
+                            <p>District: ${item.district}</p>
+                            <img src="${item.detail_file}" alt="${item.name}" class="img-fluid">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderConstituencyDetails(data) {
+            const constituencyContainer = document.getElementById('constituency-details');
+            if (!constituencyContainer) {
+                console.error("Error: 'constituency-details' element not found.");
+                return;
+            }
+
+            constituencyContainer.innerHTML = ''; // Clear previous content
+
+            if (data.length === 0) {
+                constituencyContainer.innerHTML = '<p>No constituency data available.</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                constituencyContainer.innerHTML += `
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <img src="${item.file}" alt="${item.name}" class="img-fluid">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderConstituencyDetails1(data) {
+            const constituencyContainer = document.getElementById('constituency-details1');
+            if (!constituencyContainer) {
+                console.error("Error: 'constituency-details1' element not found.");
+                return;
+            }
+
+            constituencyContainer.innerHTML = ''; // Clear previous content
+
+            if (data.length === 0) {
+                constituencyContainer.innerHTML = '<p>No detailed constituency data available.</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                constituencyContainer.innerHTML += `
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <img src="${item.detail_file}" alt="${item.name}" class="img-fluid">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        // function renderDistrictDetails(data) {
+        //     const districtContainer = document.getElementById('district-details');
+        //     districtContainer.innerHTML = '';
+
+        //     data.forEach(item => {
+        //         districtContainer.innerHTML += `
+        //             <div class="card mt-3">
+        //                 <div class="card-body">
+                          
+        //                     <img src="${item.file}" alt="${item.name}" class="img-fluid">
+        //                 </div>
+        //             </div>
+        //         `;
+        //     });
+        // }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    
+        function toggleMapVisibility(selectedYear) {
+        // Hide all map containers first
+        const mapContainers = document.querySelectorAll(".map");
+        mapContainers.forEach(container => {
+            container.style.display = "none";
+        });
+
+        // Show the map container based on the selected year and update the SVG content
+        if (selectedYear === '2010') {
+            document.getElementById("mapContainer").style.display = "block";
+            updateMapForYear('2010');
+        } else if (selectedYear === '2015') {
+            document.getElementById("mapContainer2").style.display = "block";
+            updateMapForYear('2015');
+        } else if (selectedYear === '2020') {
+            document.getElementById("mapContainer3").style.display = "block";
+            updateMapForYear('2020');
+        }
+    }
+    </script>
+
+{% endblock content %}

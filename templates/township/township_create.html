@@ -1,0 +1,63 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Township</title>
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Create Township</h1>
+
+    <!-- Form for Single Township Creation -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Township Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter township name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="khayine" class="form-label">Khayine</label>
+            <select id="khayine" name="khayine" class="form-select" required>
+                <option value="">Select a khayine</option>
+                {% for khayine in khayines %}
+                <option value="{{ khayine.id }}">{{ khayine.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Create Township</button>
+            <a href="{% url 'township_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+    </form>
+
+    <hr class="my-5">
+
+    <!-- Form for Bulk Township Creation via Excel -->
+    <h2 class="text-center mb-4">Bulk Upload Townships (Excel)</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="file" class="form-label">Upload Excel File</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Upload and Create Townships</button>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

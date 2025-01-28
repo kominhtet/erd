@@ -1,0 +1,79 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Number of Voters</title>
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Create Number of Voters Record</h1>
+
+    <!-- Form for Single Record Creation -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="can_vote" class="form-label">Can Vote</label>
+            <input type="number" class="form-control" id="can_vote" name="can_vote" required>
+        </div>
+        <div class="mb-3">
+            <label for="station_vote" class="form-label">Station Vote</label>
+            <input type="number" class="form-control" id="station_vote" name="station_vote" required>
+        </div>
+        <div class="mb-3">
+            <label for="advance_vote" class="form-label">Advance Vote</label>
+            <input type="number" class="form-control" id="advance_vote" name="advance_vote" required>
+        </div>
+        <div class="mb-3">
+            <label for="total_vote" class="form-label">Total Vote</label>
+            <input type="number" class="form-control" id="total_vote" name="total_vote" required>
+        </div>
+        <div class="mb-3">
+            <label for="constituency" class="form-label">Constituency</label>
+            <select id="constituency" name="constituency" class="form-select" required>
+                <option value="">Select a constituency</option>
+                {% for constituency in constituencies %}
+                <option value="{{ constituency.id }}">{{ constituency.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="district" class="form-label">District</label>
+            <select id="district" name="district" class="form-select" required>
+                <option value="">Select a district</option>
+                {% for district in districts %}
+                <option value="{{ district.id }}">{{ district.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="election_year" class="form-label">Election Year</label>
+            <input type="number" class="form-control" id="election_year" name="election_year" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a href="{% url 'number_of_voters_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+
+    <hr class="my-5">
+
+    <!-- Form for Bulk Upload using Excel -->
+    <h2 class="text-center mb-4">Bulk Upload Number of Voters (Excel)</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="file" class="form-label">Upload Excel File</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+        </div>
+        <button type="submit" class="btn btn-success">Upload and Create</button>
+    </form>
+</div>
+
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

@@ -1,0 +1,34 @@
+{% extends 'includes/base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1 class="text-center mb-4">{{ party.name }}</h1>
+
+                <!-- Party Logo Display -->
+                <div class="text-center mb-4">
+                    {% if party.logo %}
+                        <img src="{{ party.logo.url }}" alt="{{ party.name }}" class="img-fluid rounded" style="max-width: 200px;">
+                    {% else %}
+                        <p class="text-muted">No logo available.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Edit/Delete Buttons -->
+                <div class="text-center mb-4">
+                    <a href="{% url 'party_update' party.pk %}" class="btn btn-warning me-2">Edit Party</a>
+                    <a href="{% url 'party_delete' party.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this party?');">Delete Party</a>
+                </div>
+
+                <!-- Back to List Button -->
+                <div class="text-center">
+                    <a href="{% url 'party_list' %}" class="btn btn-secondary">Back to Party List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}

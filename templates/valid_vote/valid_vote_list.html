@@ -1,0 +1,49 @@
+{% extends 'includes/base.html' %}
+{% block content %}
+<div class="container-fluid mt-5">
+    <h1 class="text-center mb-4">ရရှိသည့်ခိုင်လုံမဲ</h1>
+    <a href="{% url 'valid_vote_create' %}" class="btn btn-success mb-3">Create New ရရှိသည့်ခိုင်လုံမဲ</a>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>မဲရုံမဲ</th>
+                <th>ကြိုတင်မဲ</th>
+                <th>စုစုပေါင်း</th>
+                <th>ရာခိုင်နှုန်း</th>
+                <th>win_lose</th>
+                <th>candidate</th>
+                <th>ပါတီ</th>
+                <th>မဲဆန္ဒနယ်</th>
+                <th>တိုင်း/ပြည်နယ်</th>
+                <th>election_year</th>
+                <th>hlutdaw</th>
+                <th>မှတ်ချက်</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vote in votes %}
+            <tr>
+                <td>{{ vote.id }}</td>
+                <td>{{ vote.station_vote }}</td>
+                <td>{{ vote.advance_vote }}</td>
+                <td>{{ vote.total_vote }}</td>
+                <td>{{ vote.percentage }}</td>
+                <td>{{ vote.win_lose }}</td>
+                <td>{{ vote.candidate }}</td>
+                <td>{{ vote.party }}</td>
+                <td>{{ vote.constituency.name|default:"No Name" }}</td>
+                <td>{{ vote.district }}</td>
+                <td>{{ vote.election_year }}</td>
+                <td>{{ vote.hlutdaw }}</td>
+                <td>
+                    <a href="{% url 'valid_vote_update' vote.id %}" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="{% url 'valid_vote_delete' vote.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

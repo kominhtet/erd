@@ -1,0 +1,44 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Khayine</title>
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Update Khayine</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ khayine.id }}">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ khayine.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="district" class="form-label">District</label>
+            <select id="district" name="district" class="form-select" required>
+                {% for district in districts %}
+                <option value="{{ district.id }}" {% if district.id == khayine.district.id %}selected{% endif %}>
+                    {{ district.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{% url 'khayine_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

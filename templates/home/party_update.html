@@ -1,0 +1,44 @@
+{% extends 'includes/base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1 class="text-center mb-4">Update Party</h1>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Party Name Field -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Party Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ party.name }}" required>
+                    </div>
+
+                    <!-- Current Logo Display -->
+                    <div class="mb-3">
+                        <label for="current-logo" class="form-label">Current Logo</label><br>
+                        {% if party.logo %}
+                            <img src="{{ party.logo.url }}" alt="{{ party.name }}" style="max-width: 150px; max-height: 150px;" class="img-thumbnail">
+                        {% else %}
+                            <p>No logo available.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Logo Upload Field -->
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Upload New Logo (Optional)</label>
+                        <input type="file" class="form-control" id="logo" name="logo">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mb-3 text-center">
+                        <button type="submit" class="btn btn-success">Update Party</button>
+                        <a href="{% url 'party_detail' party.pk %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

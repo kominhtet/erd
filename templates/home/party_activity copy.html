@@ -1,0 +1,534 @@
+{% extends 'includes/base.html' %}
+
+{% block navbar %}
+  {{ block.super }} {# Ensures the navbar from the parent template is displayed #}
+{% endblock %}
+{% load static %}
+{% block content %}
+<br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/assets/img/icons/common/mstc.ico" type="image/png">
+    <title>Embed View</title>
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <!-- <link href="{% static 'bootstrap-icons.min.css' %}" rel="stylesheet"> -->
+    <link href="{% static 'ck/css/all.css' %}" rel="stylesheet">
+    <link href="{% static 'select2.min.css' %}" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet"> -->
+    <style>
+        .notification {
+            background-color: #2e2d29;
+            color: #fff;
+            padding: 5px 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            /* right: 30px; */
+        }
+
+        .notification i {
+            margin-right: 10px;
+        }
+        .icon-button__badge {
+        position: absolute;
+        top: -15px;
+        right: -35px;
+        width: 50px;
+        height: 30px;
+        background: red;
+        color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 30%;
+        font-size: 0.75rem;
+        }
+        textarea{
+            line-height: 1.5;
+            field-sizing: content;
+        }
+        .dropdown button {
+            background-color: #007bff; /* Bootstrap primary color */
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 200px; /* Full width for consistency */
+        }
+
+        .dropdown button:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+
+        /* Dropdown content styling */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .dropdown-content label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .dropdown-content label input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        /* Show dropdown content on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Apply styles to the multi-select box */
+        .dropdown select#channel {
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            outline: none;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        /* Additional styling to improve aesthetics */
+        .dropdown .form-control {
+            padding: 0;
+            margin: 0;
+            border: none;
+            outline: none;
+        }
+        .dropdown-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-2">
+    <h2 class="text-center mb-4">ပါတီလှုပ်ရှားမှုသတင်းများ</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <form id="filter-form" class="mb-4">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <input type="date" id="start-date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="">
+                            <input type="date" id="end-date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="">                
+                            <input type="text" id="keyword" class="form-control" placeholder="Enter Keywords">
+                        </div>
+                    </div>                  
+                    <div class="col-md-1">
+                        <div class="mb-3">             
+                            <button type="button" id="filter-btn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i>ရှာရန်</button>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="mb-3">
+                            <button type="button" id="refresh-btn" class="btn btn-secondary"><i class="fa-solid fa-arrows-rotate"></i>Refresh</button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-1">                       
+                        <span class="notification">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="icon-button__badge" id="total-count">0</span> 
+                        </span>                      
+                    </div>
+                </div>
+            </form>
+            
+        </div>     
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    <div>
+                        <table class="table table-bordered table-hover table-striped">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>Facebook</th>
+                                    <th>Telegram</th>
+                                    <th>Twitter</th>
+                                    <th>Youtube</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-header">
+                                <!-- Data rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div>
+                        <table class="table table-bordered table-hover table-striped">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>Social Media</th>
+                                    <th>Likes</th>
+                                    <th>Comments</th>
+                                    <th>Shares</th>
+                                    <th>Views</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-fb">
+                                <!-- Data rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div id="data-container" class="table-responsive" style="height: 800px; overflow-y: auto;">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>                          
+                            <th>Description</th>
+                            <th>Source</th>
+                            <th>Page/Channel</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-body">
+                        <!-- Data rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        
+        
+    </div>          
+    <nav id="pagination-nav" aria-label="Page navigation example">
+        <ul class="pagination">
+            <!-- Pagination will be inserted here -->
+        </ul>
+    </nav>
+</div>
+
+{% block javascripts %}
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'api.js' %}"></script>
+<script src="{% static 'marked.min.js' %}"></script>
+<script src="{% static 'select2.min.js' %}"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
+
+{% endblock javascripts %}
+<script>
+    const apiUrl = api.API_URL;
+    document.getElementById('filter-btn').addEventListener('click', function() {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        const keyword = document.getElementById('keyword').value.trim();
+        const selectedPages = Array.from(document.querySelectorAll('input[name="page"]:checked')).map(cb => cb.value);
+
+        const url = new URL(`${apiUrl}api/embedView/`);
+
+        if (startDate) url.searchParams.append('start_date', startDate);
+        if (endDate) url.searchParams.append('end_date', endDate);
+        if (keyword) url.searchParams.append('keyword', keyword);
+        if (selectedPages.length > 0) {
+            selectedPages.forEach(page => url.searchParams.append('user_name', page));
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log('API Response:', data);
+
+                if (data.results) {
+                    updateTable(data.results);
+                    updateSourceCounts(data.source_counts);
+                    updateFbCounts(data.fb_counts,data.telegram_counts,data.youtube_counts,data.x_counts);
+                    updatePagination(data);
+                    updateTotalCount(data.count);
+                } else {
+                    console.error('No results found in API response');
+                    updateTotalCount(0); 
+                    updateSourceCounts({});
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
+
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        // Clear input fields
+        document.getElementById('start-date').value = '';
+        document.getElementById('end-date').value = '';
+        document.getElementById('keyword').value = '';
+
+        // Clear table data
+        clearTable();
+
+        // Reset total count
+        updateTotalCount(0);
+
+        // Fetch initial data
+        fetchInitialData();
+    });
+    
+    function updateTable(data) {
+        const tbody = document.getElementById('data-body');
+        tbody.innerHTML = '';
+
+        if (data.length > 0) {
+            data.forEach(item => {
+                // Convert the date string to a Date object
+                const dateObj = new Date(item.date);
+
+                // Format the date as desired (e.g., YYYY-MM-DD HH:MM:SS)
+                const formattedDate = dateObj.toLocaleString('en-GB', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                }).replace(',', '');
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${item.text}</td>                   
+                    <td>${item.source}</td>  
+                    <td>${item.user_name}</td>   
+                    <td><a href="${item.link}" target="_blank">Link</a></td>               
+                `;
+                tbody.appendChild(row);
+            });
+            updateSourceCount(data);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5">No data available</td></tr>';
+        }
+    }
+
+    function updateSourceCounts(sourceCounts) {
+        const header = document.getElementById('data-header');
+        header.innerHTML = '';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${sourceCounts.Facebook || 0}</td>
+            <td>${sourceCounts.Telegram || 0}</td>
+            <td>${sourceCounts.X || 0}</td>
+            <td>${sourceCounts.Youtube || 0}</td>
+        `;
+        header.appendChild(row);
+    }
+
+    function updateFbCounts(fb_counts, telegram_counts,youtube_counts,x_counts) {
+        const header = document.getElementById('data-fb');
+        header.innerHTML = ''; // Clear existing rows
+
+        // First row for Facebook
+        const row1 = document.createElement('tr');
+        row1.innerHTML = `
+            <td>FB</td>   
+            <td>${fb_counts.likes || 0}</td>
+            <td>${fb_counts.comments || 0}</td>
+            <td>${fb_counts.shares || 0}</td>
+            <td>${fb_counts.views || 0}</td>
+        `;
+        header.appendChild(row1);
+
+        // Second row for Telegram
+        const row2 = document.createElement('tr');
+        row2.innerHTML = `
+            <td>Telegram</td>   
+            <td>${telegram_counts.likes || 0}</td>
+            <td>${telegram_counts.comments || 0}</td>
+            <td>${telegram_counts.shares || 0}</td>
+            <td>${telegram_counts.views || 0}</td>
+        `;
+        header.appendChild(row2);
+
+        const row3 = document.createElement('tr');
+        row3.innerHTML = `
+            <td>Youtube</td>   
+            <td>${youtube_counts.likes || 0}</td>
+            <td>${youtube_counts.comments || 0}</td>
+            <td>${youtube_counts.shares || 0}</td>
+            <td>${youtube_counts.views || 0}</td>
+        `;
+        header.appendChild(row3);
+        const row4 = document.createElement('tr');
+        row4.innerHTML = `
+            <td>X</td>   
+            <td>${x_counts.likes || 0}</td>
+            <td>${x_counts.comments || 0}</td>
+            <td>${x_counts.shares || 0}</td>
+            <td>${x_counts.views || 0}</td>
+        `;
+        header.appendChild(row4);
+    }
+
+    function updateSourceCount(data) {
+        const sourceCount = data.reduce((count, item) => {
+            return count;
+        }, {});
+    }
+ 
+    function updatePagination(data) {
+        const paginationNav = document.getElementById('pagination-nav');
+        const pagination = paginationNav.querySelector('.pagination');
+        pagination.innerHTML = '';
+
+        if (data.previous) {
+            pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-url="${data.previous}">Previous</a></li>`;
+        }
+        if (data.next) {
+            pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-url="${data.next}">Next</a></li>`;
+        }
+
+        pagination.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch(link.dataset.url)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateTable(data.results);
+                        updatePagination(data);
+                        updateTotalCount(data.count); // Update total count
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            });
+        });
+    }
+
+    function updateTotalCount(count) {
+        document.getElementById('total-count').textContent = count;
+    }
+
+    function clearTable() {
+        const tbody = document.getElementById('data-body');
+        tbody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
+    }
+    
+    // Helper function to get the CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function formatNumber(num) {
+        if (num >= 1e9) {
+            return (num / 1e9).toFixed(1) + 'B'; // Billion
+        } else if (num >= 1e6) {
+            return (num / 1e6).toFixed(1) + 'M'; // Million
+        } else if (num >= 1e3) {
+            return (num / 1e3).toFixed(1) + 'K'; // Thousand
+        } else {
+            return num.toString(); // Less than 1000
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Assuming you get the count from some API or logic
+        let totalCount = 2000000; // Example count
+
+        // Format the number
+        const formattedCount = formatNumber(totalCount);
+
+        // Set the badge text
+        document.getElementById('total-count').textContent = formattedCount;
+    }); 
+
+   
+
+    document.addEventListener('click', function(event) {
+        var dropdowns = document.querySelectorAll('.dropdown-content');
+        var dropdownButtons = document.querySelectorAll('.dropdown button');
+
+        dropdowns.forEach(function(dropdown, index) {
+            var dropdownButton = dropdownButtons[index];
+
+            // Close dropdown only if the click is outside both the dropdown content and the button
+            if (!dropdown.contains(event.target) && !dropdownButton.contains(event.target)) {
+                dropdown.style.display = 'none';
+            } else if (dropdownButton.contains(event.target)) {
+                // Toggle dropdown display when the button is clicked
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            }
+        });
+    });
+
+    // Attach event listener to each dropdown's "All" checkbox
+    document.querySelectorAll('.dropdown-content input[type="checkbox"][value="all"]').forEach(function(allCheckbox) {
+        allCheckbox.addEventListener('change', handleSelectAll);
+    });
+
+    // Attach event listener to the "All Telegram" checkbox
+    document.querySelectorAll('.dropdown-content input[type="checkbox"][value="alltelegram"]').forEach(function(telegramCheckbox) {
+        telegramCheckbox.addEventListener('change', handleSelectTelegram);
+    });
+
+    document.querySelectorAll('.dropdown-content input[type="checkbox"][value="allyoutube"]').forEach(function(youtubeCheckbox) {
+        youtubeCheckbox.addEventListener('change', handleSelectYoutube);
+    });
+
+    document.querySelectorAll('.dropdown-content input[type="checkbox"][value="alltwitter"]').forEach(function(xCheckbox) {
+        xCheckbox.addEventListener('change', handleSelectX);
+    });
+
+    document.querySelectorAll('.dropdown-content input[type="checkbox"][value="allfacebook"]').forEach(function(facebookCheckbox) {
+        facebookCheckbox.addEventListener('change', handleSelectFacebook);
+    });
+
+    // Example usage: getting selected pages on button click
+    document.querySelectorAll('.dropdown button').forEach(function(button, index) {
+        button.addEventListener('click', function() {
+            var dropdownContent = document.querySelectorAll('.dropdown-content')[index];
+            console.log(getSelectedPages(dropdownContent));
+        });
+    });
+    document.getElementById('keyword').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default form submission (if inside a form)
+            document.getElementById('filter-btn').click(); // Simulate a click on the filter button
+        }
+    });
+    document.getElementById('additional-search').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default form submission
+            document.getElementById('embed-search-btn').click(); // Trigger the search button click
+        }
+    });
+</script>
+</body>
+</html>
+{% endblock %}

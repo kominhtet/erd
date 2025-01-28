@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>{% block title %}Election Result - Dashboard{% endblock %}</title>
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">  
+</head>
+
+<body id="page-top">
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'index' %}">
+                <div class="sidebar-brand-icon">
+                    <!-- <div class="sidebar-brand-icon rotate-n-15"> -->
+                    <img src="{% static 'img/uec.png' %}" alt="Brand Icon" style="width: 80px; height: 80px;">
+                </div>
+                <div class="sidebar-brand-text mx-3">Election Result Dashboard</div>
+            </a>
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="{% url 'index' %}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>HOME</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'party_list' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>ပါတီ</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'district_list' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>တိုင်းဒေသကြီး/ပြည်နယ်</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'khayine_list' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>ခရိုင်များ</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'township_list' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>မြို့နယ်များ</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'constituency_list' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>မဲဆန္ဒနယ်များ</span></a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'number_of_voters_list1' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>မဲပေးသူဦးရေ</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'valid_vote_list' %}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>ရရှိသည့်ခိုင်လုံမဲ</span></a>
+            </li>
+        </ul>
+        
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                
+
+                <!-- Page Content -->
+                <div class="container-fluid">
+                    {% block content %}
+                    <!-- Dynamic page content will be inserted here -->
+                    {% endblock %}
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; UEC Myanmar 2024</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Scripts -->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+    <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
+    <script src="{% static 'js/demo/chart-area-demo.js' %}"></script>
+    <script src="{% static 'js/demo/chart-pie-demo.js' %}"></script>
+    <script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

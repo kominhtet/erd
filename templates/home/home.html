@@ -1,0 +1,146 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>ခိုင်လုံမဲရရှိမှုဇယားများ</h1>
+
+        <!-- Filter Section -->
+        <div class="row">
+            <div class="col-md-3">
+                <label for="election_year">Election Year:</label>
+                <select id="election_year" class="form-control">
+                    <option value="">All Years</option>
+                    <option value="2010">2010</option>
+                    <option value="2015">2015</option>
+                    <option value="2020">2020</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="district">District:</label>
+                <select id="district" class="form-control">
+                    <option value="">All Districts</option>
+                    <option value="ကချင်">ကချင်</option>
+                    <option value="ကယား">ကယား</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="hlutdaw">Hlutdaw:</label>
+                <select id="hlutdaw" class="form-control">
+                    <option value="">All Hlutdaws</option>
+                    <option value="အမျိုးသားလွှတ်တော်">Amyothar Hlutdaw</option>
+                    <option value="ပြည်သူ့လွှတ်တော်">Pyithu Hlutdaw</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="constituency">Constituency:</label>
+                <select id="constituency" class="form-control">
+                    <option value="">All Constituencies</option>
+                    <option value="မြစ်ကြီးနား">မြစ်ကြီးနား</option>
+                    <option value="ပူတာအို">ပူတာအို</option>
+                    <option value="နောင်မွန်း">နောင်မွန်း</option>
+                    <option value="မဲဆန္ဒနယ်(၁)">မဲဆန္ဒနယ်(၁)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Button to Fetch Filtered Results -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button id="filter-btn" class="btn btn-primary">Filter Results</button>
+            </div>
+        </div>
+
+        <!-- Display Results -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ကိုယ်စားလှယ်လောင်း</th>
+                            <th>ပါတီ</th>
+                            <th>မဲဆန္ဒနယ်</th>
+                            <th>ပြည်နယ်/တိုင်း</th>
+                            <th>လွှတ်တော်</th>
+                            <th>မဲစုစုပေါင်း</th>
+                            <th>ရာခိုင်နှုန်း</th>
+                            <th>ရွေးကောက်ပွဲနှစ်</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-table">
+                        <!-- Results will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Correct Script Order -->
+    <!-- jQuery must come first -->
+    <script src="{% static 'jquery-3.5.1.min.js' %}"></script>
+    <!-- Then Popper and Bootstrap JS -->
+    <script src="{% static 'popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap.min.js' %}"></script>
+
+    <script>
+        // Fetch Data Based on Filter Criteria
+        function fetchFilteredData() {
+            // Get values from filters
+            let election_year = $('#election_year').val();
+            let district = $('#district').val();
+            let hlutdaw = $('#hlutdaw').val();
+            let constituency = $('#constituency').val();
+
+            // Build query string
+            let queryString = `?election_year=${election_year}&district=${district}&hlutdaw=${hlutdaw}&constituency=${constituency}`;
+
+            // Make AJAX request to the API
+            $.ajax({
+                url: `http://127.0.0.1:8000/api/valid-vote/${queryString}`,
+                method: 'GET',
+                success: function(data) {
+                    // Clear the table
+                    $('#results-table').empty();
+
+                    // Loop through the data and append rows to the table
+                    data.forEach(function(item) {
+                        $('#results-table').append(`
+                            <tr>
+                                <td>${item.candidate}</td>
+                                <td>${item.party}</td>
+                                <td>${item.constituency}</td>
+                                <td>${item.district}</td>
+                                <td>${item.hlutdaw}</td>
+                                <td>${item.total_vote}</td>
+                                <td>${item.percentage}</td>
+                                <td>${item.election_year}</td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error fetching data', error);
+                }
+            });
+        }
+
+        // Fetch data when filter button is clicked
+        $('#filter-btn').on('click', function() {
+            fetchFilteredData();
+        });
+    </script>
+</body>
+</html>
+{% endblock content %}

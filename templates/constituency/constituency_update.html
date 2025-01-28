@@ -1,0 +1,103 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Constituency</title>
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Update Constituency</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ constituency.id }}">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="name" class="form-label">မဲဆန္ဒနယ်အမည်</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ constituency.name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="district" class="form-label">ပြည်နယ်</label>
+                <select id="district" name="district" class="form-select" required>
+                    {% for district in districts %}
+                    <option value="{{ district.id }}" {% if district.id == constituency.district.id %}selected{% endif %}>
+                        {{ district.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <!-- <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="khayine" class="form-label">ခရိုင်</label>
+                <select id="khayine" name="khayine" class="form-select" required>
+                    {% for khayine in khayines %}
+                    <option value="{{ khayine.id }}" {% if khayine.id == constituency.khayine.id %}selected{% endif %}>
+                        {{ khayine.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="township" class="form-label">မြို့နယ်</label>
+                <select id="township" name="township" class="form-select" required>
+                    {% for township in townships %}
+                    <option value="{{ township.id }}" {% if township.id == constituency.township.id %}selected{% endif %}>
+                        {{ township.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div> -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="mb-3">
+                    <label for="current-file" class="form-label">မဲဆန္ဒနယ်ရလာဒ်</label><br>
+                    {% if constituency.file %}
+                        <img src="{{ constituency.file.url }}" alt="{{ constituency.name }}" style="max-width: 300px; max-height: 300px;" class="img-thumbnail">
+                    {% else %}
+                        <p>No logo available.</p>
+                    {% endif %}
+                </div>
+                <!-- Logo Upload Field -->
+                <div class="mb-3">
+                    <label for="file" class="form-label">Upload New file (Optional)</label>
+                    <input type="file" class="form-control" id="file" name="file">
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="mb-3">
+                    <label for="current-file" class="form-label">မဲဆန္ဒနယ်အချက်အလက်</label><br>
+                    {% if constituency.detail_file %}
+                        <img src="{{ constituency.detail_file.url }}" alt="{{ constituency.name }}" style="max-width: 300px; max-height: 300px;" class="img-thumbnail">
+                    {% else %}
+                        <p>No logo available.</p>
+                    {% endif %}
+                </div>
+                <!-- Logo Upload Field -->
+                <div class="mb-3">
+                    <label for="detail_file" class="form-label">Upload New file (Optional)</label>
+                    <input type="file" class="form-control" id="detail_file" name="detail_file">
+                </div>
+            </div>
+        </div>
+        
+
+        
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{% url 'constituency_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

@@ -1,0 +1,53 @@
+{% extends 'home/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Create Valid Vote</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Station Vote:</label>
+            <input type="number" name="station_vote" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Advance Vote:</label>
+            <input type="number" name="advance_vote" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Total Vote:</label>
+            <input type="number" name="total_vote" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Percentage:</label>
+            <input type="number" name="percentage" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Candidate:</label>
+            <input type="text" name="candidate" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Party:</label>
+            <input type="text" name="party" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Constituency:</label>
+            <input type="text" name="constituency" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>District:</label>
+            <input type="text" name="district" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Election Year:</label>
+            <input type="number" name="election_year" class="form-control">
+        </div>
+        
+        <div class="form-group mt-3">
+            <label>Or upload an Excel file:</label>
+            <input type="file" name="file" class="form-control-file">
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-3">Create</button>
+    </form>
+</div>
+{% endblock %}

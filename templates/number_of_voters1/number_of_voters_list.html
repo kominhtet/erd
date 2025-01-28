@@ -1,0 +1,56 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number of Voters List</title>
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">တိုင်းဒေသကြီး/ပြည်နယ်အလိုက် မဲပေးသူဦးရေ</h1>
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>မဲဆန္ဒရှင်ဦးရေ</th>
+                <th>မဲရုံမဲ</th>
+                <th>ကြိုတင်မဲ</th>
+                <th>စုစုပေါင်း</th>
+                <th>မဲဆန္ဒနယ်</th>
+                <th>တိုင်းဒေသကြီး/ပြည်နယ်</th>
+                <th>ရွေးကောက်ပွဲကျင်းပသည့်ခုနှစ်</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for voter in voters %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                {% comment %} <td>{{ voter.id }}</td> {% endcomment %}
+                <td>{{ voter.can_vote }}</td>
+                <td>{{ voter.station_vote }}</td>
+                <td>{{ voter.advance_vote }}</td>
+                <td>{{ voter.total_vote }}</td>
+                <td>{{ voter.constituency }}</td>
+                <td>{{ voter.district }}</td>
+                <td>{{ voter.election_year }}</td>
+                <td>
+                    <a href="{% url 'number_of_voters_update1' voter.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'number_of_voters_delete1' voter.id %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="text-center mt-4">
+        <a href="{% url 'number_of_voters_create1' %}" class="btn btn-primary">Create New Voter Record</a>
+    </div>
+</div>
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

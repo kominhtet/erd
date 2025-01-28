@@ -1,0 +1,93 @@
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Constituency</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1 class="text-center mb-4">မဲဆန္ဒနယ် အသစ်ထည့်ရန်</h1>
+
+                <!-- Form for Single Party Creation -->
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Constituency Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter Constituency name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="district" class="form-label">District</label>
+                        <select id="district" name="district" class="form-select" required>
+                            <option value="">Select a district</option>
+                            {% for district in districts %}
+                            <option value="{{ district.id }}">{{ district.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="khayine" class="form-label">Khayine</label>
+                        <select id="khayine" name="khayine" class="form-select" required>
+                            <option value="">Select a khayine</option>
+                            {% for khayine in khayines %}
+                            <option value="{{ khayine.id }}">{{ khayine.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="township" class="form-label">township</label>
+                        <select id="township" name="township" class="form-select" required>
+                            <option value="">Select a township</option>
+                            {% for township in townships %}
+                            <option value="{{ township.id }}">{{ township.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file" class="form-label">မဲဆန္ဒနယ်ခိုင်လုံမဲရရှိမှု</label>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="detail_file" class="form-label">မဲဆန္ဒနယ်အချက်အလက်</label>
+                        <input type="file" class="form-control" id="detail_file" name="detail_file" required>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">ထည့်မည်</button>
+                        <a href="{% url 'constituency_list' %}" class="btn btn-secondary ms-2">Back to မဲဆန္ဒနယ်များ</a>
+                    </div>
+                </form>
+
+                <hr class="my-5">
+
+                <!-- Form for Bulk Township Creation via Excel -->
+                <h2 class="text-center mb-4">Bulk Upload Townships (Excel)</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Upload Excel File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success">Upload and Create Townships</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
+{% endblock content %}

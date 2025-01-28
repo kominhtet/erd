@@ -1,0 +1,32 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Number of Voters</title>
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Are you sure you want to delete this Number of Voters record?</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ voters.id }}">
+        <p>Can Vote: {{ voters.can_vote }}</p>
+        <p>Station Vote: {{ voters.station_vote }}</p>
+        <p>Advance Vote: {{ voters.advance_vote }}</p>
+        <p>Total Vote: {{ voters.total_vote }}</p>
+        <p>Constituency: {{ voters.constituency }}</p>
+        <p>District: {{ voters.district }}</p>
+        <p>Election Year: {{ voters.election_year }}</p>
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'number_of_voters_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+{% endblock content %}

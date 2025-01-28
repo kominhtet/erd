@@ -1,0 +1,269 @@
+{% extends 'includes/base.html' %}
+{% block navbar %}
+  {{ block.super }} {# Ensures the navbar from the parent template is displayed #}
+{% endblock %}
+{% block content %}
+<h1>ပါတီအလိုက် ယှဉ်ပြိုင်ခဲ့သည့် ရလာဒ်များ</h1>
+<div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+    <div class="d-flex align-items-center w-100">
+        <form method="GET" action="" class="d-flex w-50">
+            <input 
+                type="text" 
+                name="party" 
+                class="form-control me-3" 
+                placeholder="ပါတီအလိုက်ရှာရန်" 
+                value="{{ request.GET.party|default:'' }}" 
+                style="flex: 1;"> <!-- Adjusted width -->
+            <select 
+                name="election_year" 
+                class="form-control me-2" 
+                style="flex: 1;">
+                <option value="" {% if not request.GET.election_year %}selected{% endif %}>ရွေးကောက်ပွဲနှစ်</option>
+                <option value="2010" {% if request.GET.election_year == '2010' %}selected{% endif %}>2010</option>
+                <option value="2015" {% if request.GET.election_year == '2015' %}selected{% endif %}>2015</option>
+                <option value="2020" {% if request.GET.election_year == '2020' %}selected{% endif %}>2020</option>
+            </select>
+            <button type="submit" class="btn btn-primary me-2">Search</button>
+        </form>
+        <a href="{% url 'party_result' %}" onclick="resetFilters(event)" class="btn btn-secondary">Refresh</a>
+    </div>
+</div>
+<div class="row" style="display: flex; gap: 1rem;">
+    <!-- Table Section -->
+    <div class="col-md-6 col-sm-6" style="flex: 1;">
+        <div class="x_panel" style="height: 100%;">
+            <div class="x_title">
+                <h2>အနိုင်/အရှုံးနှင့်ယှဉ်ပြိုင်ခဲ့သည့်မဲဆန္ဒနယ်များ</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content" style="overflow-y: auto; max-height: 600px; height: 100%;">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ရွေးကောက်ပွဲနှစ်</th>
+                            <th>ယှဉ်ပြိုင်ခဲ့သည့်မဲဆန္ဒနယ်များ</th>
+                            <th>အနိုင်ရရှိခဲ့သည့်မဲဆန္ဒနယ်များ</th>
+                            <th>ရှုံးနိမ်ခဲ့သည့်မဲဆန္ဒနယ်များ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for year_data in votes_per_year %}
+                            <tr>
+                                <td>{{ year_data.election_year }}</td>
+                                <td>{{ year_data.total_votes_count }}</td>
+                                <td>{{ year_data.winning_votes_count }}</td>
+                                <td>{{ year_data.losing_votes_count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Chart Section -->
+    <div class="col-md-6 col-sm-6" style="flex: 1;">
+        <div class="x_panel" style="height: 100%;">
+            <div class="x_title">
+                <h2>Bar Graph</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content" style="height: 100%; display: flex; align-items: center;">
+                <canvas id="votesChart" style="max-height: 100%; width: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+
+{% if show_tables %} 
+<div class="row" style="display: flex; align-items: stretch; height: 100%;">
+    <!-- Left Side: ယှဉ်ပြိုင်ခဲ့သော မဲဆန္ဒနယ်များ -->
+    <div class="col-md-6 col-sm-12" style="border: 1px solid #ddd; padding: 10px; display: flex; flex-direction: column;">
+        <div class="x_panel" style="flex: 1;">
+            <div class="x_title">
+                <h2 style="color: blue;">ယှဉ်ပြိုင်ခဲ့သော မဲဆန္ဒနယ်များ</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content" style="overflow-y: auto; max-height: 100%;"> <!-- Left table becomes scrollable -->
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Constituency</th>
+                            <th>Election Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vote in votes %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ vote.constituency.name }}</td>
+                            <td>{{ vote.election_year }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center">No data found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side: Two stacked tables -->
+    <div class="col-md-6 col-sm-12" style="display: flex; flex-direction: column;">
+        <!-- Top Right: အနိုင်ရရှိခဲ့သော မဲဆန္ဒနယ်များ -->
+        <div style="flex: 1; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+            <div class="x_panel" style="flex: 1;">
+                <div class="x_title">
+                    <h2 style="color: green;">အနိုင်ရရှိခဲ့သော မဲဆန္ဒနယ်များ</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content" style="overflow-y: auto; max-height: 100%;">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Total Vote</th>
+                                <th>Percentage</th>
+                                <th>Win/Lose</th>
+                                <th>Constituency</th>
+                                <th>Election Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vote in winning_votes %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ vote.total_vote }}</td>
+                                <td>{{ vote.percentage }}%</td>
+                                <td>{{ vote.win_lose|yesno:"Win,Lose" }}</td>
+                                <td>{{ vote.constituency.name }}</td>
+                                <td>{{ vote.election_year }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No data found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Right: ရှုံးနိမ့်ခဲ့သော မဲဆန္ဒနယ်များ -->
+        <div style="flex: 1; border: 1px solid #ddd; padding: 10px;">
+            <div class="x_panel" style="flex: 1;">
+                <div class="x_title">
+                    <h2 style="color: red;">ရှုံးနိမ့်ခဲ့သော မဲဆန္ဒနယ်များ</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content" style="overflow-y: auto; max-height: 100%;">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Total Vote</th>
+                                <th>Percentage</th>
+                                <th>Win/Lose</th>
+                                <th>Constituency</th>
+                                <th>Election Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vote in losing_votes %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ vote.total_vote }}</td>
+                                <td>{{ vote.percentage }}%</td>
+                                <td>{{ vote.win_lose|yesno:"Win,Lose" }}</td>
+                                <td>{{ vote.constituency.name }}</td>
+                                <td>{{ vote.election_year }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No data found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>   
+<script>
+    // Prepare data for the chart
+    const electionYears = [];
+    const totalVotes = [];
+    const winningVotes = [];
+    const losingVotes = [];
+
+    {% for year_data in votes_per_year %}
+        electionYears.push("{{ year_data.election_year }}");
+        totalVotes.push({{ year_data.total_votes_count }});
+        winningVotes.push({{ year_data.winning_votes_count }});
+        losingVotes.push({{ year_data.losing_votes_count }});
+    {% endfor %}
+
+    // Create the bar chart
+    const ctx = document.getElementById('votesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: electionYears, // X-axis labels
+            datasets: [
+                {
+                    label: 'All Constituency',
+                    data: totalVotes,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)', // Teal color
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Winning Constituency',
+                    data: winningVotes,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)', // Blue color
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Losing Constituency',
+                    data: losingVotes,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)', // Red color
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top', // Position of the legend
+                },
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Election Year'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Votes Count'
+                    },
+                    beginAtZero: true // Ensure the Y-axis starts from 0
+                }
+            }
+        }
+    });
+</script>    
+{% endif %}
+{% endblock %}
+
